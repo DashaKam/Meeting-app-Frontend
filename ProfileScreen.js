@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -7,56 +7,16 @@ import {
     StyleSheet,
     Dimensions,
     ScrollView,
-    ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import { useAuth } from './AuthContext';
 import PlaceholderImage from './assets/544.jpg';
 
 const ProfileScreen = ({ navigation }) => {
+    const { userData, logout } = useAuth();
     const [activeSlide, setActiveSlide] = useState(0);
-    const [userData, setUserData] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            setIsLoading(true);
-            try {
-                const accessToken = await AsyncStorage.getItem('access_token');
-                if (!accessToken) {
-                    console.log('Access token not found in storage.');
-                    navigation.navigate('Login');
-                    return;
-                }
-
-                console.log('Fetching user data with token:', accessToken);
-
-                const response = await axios.get('http://185.157.214.169:8888/users/me', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-
-                console.log('User data response:', response.data);
-                setUserData(response.data);
-            } catch (error) {
-                console.error('Error fetching user data:', error.response ? error.response.data : error.message);
-                if (error.response && error.response.status === 401) {
-                    console.log('Unauthorized or token expired. Clearing tokens.');
-                    await AsyncStorage.removeItem('access_token');
-                    await AsyncStorage.removeItem('refresh_token');
-                    navigation.navigate('Login');
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchUserData();
-    }, []);
 
     const getDerivedImageSources = () => {
         if (userData?.photo_urls?.length > 0) {
@@ -65,7 +25,7 @@ const ProfileScreen = ({ navigation }) => {
             return [PlaceholderImage];
         }
     };
-    
+
     const imageSources = getDerivedImageSources();
     const hasMultipleImages = imageSources.length > 1 && imageSources[0] !== PlaceholderImage;
 
@@ -75,24 +35,17 @@ const ProfileScreen = ({ navigation }) => {
         }
     };
 
-    if (isLoading) {
+    if (!userData) {
         return (
             <SafeAreaView style={[styles.container, styles.loadingContainer]}>
-                <ActivityIndicator size="large" color="#645BAA" />
+                <Text>Загрузка данных пользователя...</Text>
             </SafeAreaView>
         );
     }
-    
-    if (!isLoading && !userData) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <Text>Не удалось загрузить профиль.</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.button}>
-                    <Text style={styles.buttonText}>Вернуться ко входу</Text>
-                </TouchableOpacity>
-            </SafeAreaView>
-        );
-    }
+
+    const handleLogout = async () => {
+        await logout();
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -134,7 +87,11 @@ const ProfileScreen = ({ navigation }) => {
                     'Связаться с поддержкой',
                     'Выйти из профиля',
                 ].map((buttonLabel) => (
-                    <TouchableOpacity key={buttonLabel} style={styles.button}>
+                    <TouchableOpacity
+                        key={buttonLabel}
+                        style={styles.button}
+                        onPress={buttonLabel === 'Выйти из профиля' ? handleLogout : () => console.log(`${buttonLabel} pressed`)}
+                    >
                         <Text style={styles.buttonText}>{buttonLabel}</Text>
                     </TouchableOpacity>
                 ))}

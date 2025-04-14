@@ -1,7 +1,33 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Keyboard, Alert } from 'react-native';
+import { useAuth } from './AuthContext';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
+  const { login } = useAuth();
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!validatePhoneNumber(phoneNumber) || !validatePassword(password)) {
+      Alert.alert('Ошибка', 'Пожалуйста, введите действительный номер телефона и пароль.');
+      return;
+    }
+
+    setIsLoading(true);
+    const success = await login(phoneNumber, password);
+    setIsLoading(false);
+
+    if (success) {
+      console.log('Login successful, navigation handled by context.');
+    } else {
+      Alert.alert(
+        'Ошибка входа',
+        'Неверный номер телефона или пароль. Попробуйте еще раз.'
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Вход!</Text>

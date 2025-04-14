@@ -12,10 +12,10 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from './AuthContext'; // Import useAuth
 
 const RegistrationScreen = ({ navigation }) => {
+  const { register } = useAuth(); // Get register function from context
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +23,7 @@ const RegistrationScreen = ({ navigation }) => {
   const [phoneError, setPhoneError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  
+
   // Состояние для отслеживания фокуса на полях
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
@@ -69,28 +69,17 @@ const RegistrationScreen = ({ navigation }) => {
 
     if (!valid) return;
 
-    try {
-      const response = await axios.post(
-        'http://185.157.214.169:8888/auth/register',
-        {
-          name: name,
-          phone_number: phoneNumber,
-          password: password,
-        }
-      );
+    // Add a loading state if desired
+    // setIsLoading(true);
+    const success = await register(name, phoneNumber, password);
+    // setIsLoading(false);
 
-      console.log('Регистрация успешна:', response.data);
-
-      if (response.data.access_token && response.data.refresh_token) {
-        await AsyncStorage.setItem('access_token', response.data.access_token);
-        await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
-        console.log('Токены сохранены в AsyncStorage');
-      }
-
-      Alert.alert('Успех', 'Вы успешно зарегистрированы!');
-      navigation.navigate('Profile');
-    } catch (error) {
-      console.error('Ошибка регистрации:', error);
+    if (success) {
+      console.log('Registration successful, navigation handled by context.');
+      // Navigation is handled by AppNavigator based on AuthContext state
+      // navigation.navigate('Profile'); // Usually not needed here
+      Alert.alert('Успех', 'Вы успешно зарегистрированы!'); // Keep success alert
+    } else {
       Alert.alert(
         'Ошибка',
         'Не удалось зарегистрироваться. Попробуйте еще раз.'
@@ -98,203 +87,203 @@ const RegistrationScreen = ({ navigation }) => {
     }
   };
 
-   // Обработка событий клавиатуры
-   useEffect(() => {
-     const keyboardDidShowListener = Keyboard.addListener(
-       'keyboardDidShow',
-       () => {
-         setKeyboardVisible(true);
-       }
-     );
-     
-     const keyboardDidHideListener = Keyboard.addListener(
-       'keyboardDidHide',
-       () => {
-         setKeyboardVisible(false);
-       }
-     );
+  // Обработка событий клавиатуры
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
 
-     return () => {
-       keyboardDidHideListener.remove();
-       keyboardDidShowListener.remove();
-     };
-   }, []);
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
 
-   // Обработка фокуса на поле телефона
-   const handlePhoneFocus = () => {
-     if (!isPhoneFocused) {
-       setPhoneNumber('+79');
-       setIsPhoneFocused(true);
-     }
-     // Сброс ошибки при фокусировке
-     if (phoneError) {
-       setPhoneError('');
-     }
-   };
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
-   // Обработка фокуса на других полях
-   const handleFocusName = () => {
-     if (!isNameFocused) {
-       setName('');
-       setIsNameFocused(true);
-     }
-     // Сброс ошибки при фокусировке
-     if (nameError) {
-       setNameError('');
-     }
-   };
+  // Обработка фокуса на поле телефона
+  const handlePhoneFocus = () => {
+    if (!isPhoneFocused) {
+      setPhoneNumber('+79');
+      setIsPhoneFocused(true);
+    }
+    // Сброс ошибки при фокусировке
+    if (phoneError) {
+      setPhoneError('');
+    }
+  };
 
-   const handleFocusPassword = () => {
-     if (!isPasswordFocused) {
-       setPassword('');
-       setIsPasswordFocused(true);
-     }
-     // Сброс ошибки при фокусировке
-     if (passwordError) {
-       setPasswordError('');
-     }
-   };
+  // Обработка фокуса на других полях
+  const handleFocusName = () => {
+    if (!isNameFocused) {
+      setName('');
+      setIsNameFocused(true);
+    }
+    // Сброс ошибки при фокусировке
+    if (nameError) {
+      setNameError('');
+    }
+  };
 
-   return (
-     <ImageBackground
-       source={require('./assets/544.jpg')}
-       style={styles.background}>
-       
-       <KeyboardAvoidingView
-         style={styles.container}
-         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-         keyboardVerticalOffset={keyboardVisible ? 100 : 0}
-       >
-         <View style={styles.formContainer}>
-           <Text style={styles.title}>Скорее регистрируйся!</Text>
-           
-           <TextInput
-             style={styles.input}
-             placeholder="Как тебя зовут?"
-             value={name}
-             onChangeText={setName}
-             onFocus={handleFocusName}
-             placeholderTextColor="#CE9FDD"
-           />
-           {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
+  const handleFocusPassword = () => {
+    if (!isPasswordFocused) {
+      setPassword('');
+      setIsPasswordFocused(true);
+    }
+    // Сброс ошибки при фокусировке
+    if (passwordError) {
+      setPasswordError('');
+    }
+  };
 
-           <TextInput
-             style={styles.input}
-             placeholder="Оставь свой номерок телефона"
-             value={phoneNumber}
-             onChangeText={setPhoneNumber}
-             onFocus={handlePhoneFocus}
-             placeholderTextColor="#CE9FDD"
-           />
-           {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+  return (
+    <ImageBackground
+      source={require('./assets/544.jpg')}
+      style={styles.background}>
 
-           <TextInput
-             style={styles.input}
-             placeholder="Придумай пароль"
-             value={password}
-             onChangeText={setPassword}
-             onFocus={handleFocusPassword}
-             secureTextEntry
-             placeholderTextColor="#CE9FDD"
-           />
-           {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={keyboardVisible ? 100 : 0}
+      >
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Скорее регистрируйся!</Text>
 
-           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-             <Text style={styles.buttonText}>Зарегистрироваться</Text>
-           </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder="Как тебя зовут?"
+            value={name}
+            onChangeText={setName}
+            onFocus={handleFocusName}
+            placeholderTextColor="#CE9FDD"
+          />
+          {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
 
-           <View style={styles.linkContainer}>
-             <Text style={styles.linkText}>Уже есть аккаунт? </Text>
-             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-               <Text style={styles.link}>Скорее заходи!</Text>
-             </TouchableOpacity>
-           </View>
-         </View>
-         
-       </KeyboardAvoidingView>
-       
-     </ImageBackground>
-     
-   );
+          <TextInput
+            style={styles.input}
+            placeholder="Оставь свой номерок телефона"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            onFocus={handlePhoneFocus}
+            placeholderTextColor="#CE9FDD"
+          />
+          {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+
+          <TextInput
+            style={styles.input}
+            placeholder="Придумай пароль"
+            value={password}
+            onChangeText={setPassword}
+            onFocus={handleFocusPassword}
+            secureTextEntry
+            placeholderTextColor="#CE9FDD"
+          />
+          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Зарегистрироваться</Text>
+          </TouchableOpacity>
+
+          <View style={styles.linkContainer}>
+            <Text style={styles.linkText}>Уже есть аккаунт? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.link}>Скорее заходи!</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+      </KeyboardAvoidingView>
+
+    </ImageBackground>
+
+  );
 };
 
 const styles = StyleSheet.create({
- background: {
-   flex: 1,
-   justifyContent: 'center',
- },
- 
- container: {
-   flex: 1,
-   padding: 16,
- },
- 
- formContainer: {
-   flex: 1,
-   justifyContent: 'flex-start',
-   alignItems: 'center',
-   marginTop: 50,
- },
- 
- title: {
-   fontSize: 40,
-   fontWeight: 'regular',
-   textAlign: 'center',
-   textbackgroundColor: '#ccc',
-   marginBottom: 16,
-   color: '#645BAA',
- },
- 
- input: {
-   height: 50,
-   width: '80%',
-   backgroundColor: '#fff',
-   color: '#CE9FDD',
-   borderColor: '#fff',
-   borderWidth: 1,
-   borderRadius: 25,
-   paddingHorizontal:10,
-   marginBottom:20,
- },
- 
- button:{
-   backgroundColor:'#fff',
-   width:'80%',
-   borderRadius:20,
-   paddingVertical:10,
-   paddingHorizontal:20,
-   alignItems:'center',
- },
- 
- buttonText:{
-   color:'#645BAA',
-   fontSize:25,
- },
- 
- linkContainer:{
-     flexDirection:'row',
-     justifyContent:'center',
-     marginTop:15, 
- },
- 
- linkText:{
-     color:'#937EC3', 
-     fontSize:16,
- },
- 
- link:{
-     color:'#4D3FB7', 
-     fontSize:16,
-     textDecorationLine:'underline', 
- },
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+  },
 
- errorText:{
-     color:'red', 
-     fontSize:14, 
-     marginBottom:10, // Положительный отступ для создания пространства между полем ввода и сообщением об ошибке
-     width:'80%', // Ширина сообщения об ошибке равна ширине поля ввода
-     textAlign:'left', // Выравнивание текста по левому краю
- },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+
+  formContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+
+  title: {
+    fontSize: 40,
+    fontWeight: 'regular',
+    textAlign: 'center',
+    textbackgroundColor: '#ccc',
+    marginBottom: 16,
+    color: '#645BAA',
+  },
+
+  input: {
+    height: 50,
+    width: '80%',
+    backgroundColor: '#fff',
+    color: '#CE9FDD',
+    borderColor: '#fff',
+    borderWidth: 1,
+    borderRadius: 25,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+
+  button: {
+    backgroundColor: '#fff',
+    width: '80%',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+
+  buttonText: {
+    color: '#645BAA',
+    fontSize: 25,
+  },
+
+  linkContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15,
+  },
+
+  linkText: {
+    color: '#937EC3',
+    fontSize: 16,
+  },
+
+  link: {
+    color: '#4D3FB7',
+    fontSize: 16,
+    textDecorationLine: 'underline',
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 10, // Положительный отступ для создания пространства между полем ввода и сообщением об ошибке
+    width: '80%', // Ширина сообщения об ошибке равна ширине поля ввода
+    textAlign: 'left', // Выравнивание текста по левому краю
+  },
 });
 
 export default RegistrationScreen;
