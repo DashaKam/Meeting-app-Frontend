@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const [userData, setUserData] = useState(null);
 
     const api = axios.create({
-        baseURL: 'http://185.157.214.169:8888', // Base URL for API calls
+        baseURL: 'http://185.157.214.169:8888',
     });
 
     // Function to set Authorization header
@@ -28,14 +28,14 @@ export const AuthProvider = ({ children }) => {
         if (!token) return;
         try {
             console.log('AuthProvider: Fetching user data...');
-            setAuthHeader(token); // Set header before request
+            setAuthHeader(token);
             const response = await api.get('/users/me');
             setUserData(response.data);
             console.log('AuthProvider: User data fetched successfully.');
         } catch (error) {
             console.error('AuthProvider: Error fetching user data:', error.response ? error.response.data : error.message);
             // If fetching user data fails with the current token, treat as unauthenticated
-            await logout(); // Clear potentially invalid token and user data
+            await logout();
         }
     };
 
@@ -55,12 +55,12 @@ export const AuthProvider = ({ children }) => {
                         const newAccessToken = response.data.access_token;
                         await AsyncStorage.setItem('access_token', newAccessToken);
                         setAccessToken(newAccessToken);
-                        await fetchUserData(newAccessToken); // Fetch data with new token
+                        await fetchUserData(newAccessToken);
                         console.log('AuthProvider: Token refresh successful.');
                     } catch (refreshError) {
                         console.error('AuthProvider: Refresh token failed:', refreshError.response ? refreshError.response.data : refreshError.message);
                         // Clear tokens if refresh fails
-                        await logout(); // Log out if refresh fails
+                        await logout();
                     }
                 } else if (storedAccessToken) {
                     console.log('AuthProvider: Access token found (no refresh token), verifying...');
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
                 }
             } catch (error) {
                 console.error('AuthProvider: Error checking auth status:', error);
-                await logout(); // Log out on any other error during check
+                await logout();
             } finally {
                 setIsLoading(false);
             }
@@ -92,13 +92,13 @@ export const AuthProvider = ({ children }) => {
             await AsyncStorage.setItem('access_token', access_token);
             await AsyncStorage.setItem('refresh_token', refresh_token);
             setAccessToken(access_token);
-            await fetchUserData(access_token); // Fetch data after login
+            await fetchUserData(access_token);
             console.log('AuthProvider: Login successful.');
-            return true; // Indicate success
+            return true;
         } catch (error) {
             console.error('AuthProvider: Login failed:', error.response ? error.response.data : error.message);
-            await logout(); // Ensure clean state on failed login
-            return false; // Indicate failure
+            await logout();
+            return false;
         }
     };
 
@@ -110,13 +110,13 @@ export const AuthProvider = ({ children }) => {
             await AsyncStorage.setItem('access_token', access_token);
             await AsyncStorage.setItem('refresh_token', refresh_token);
             setAccessToken(access_token);
-            await fetchUserData(access_token); // Fetch data after registration
+            await fetchUserData(access_token);
             console.log('AuthProvider: Registration successful.');
-            return true; // Indicate success
+            return true;
         } catch (error) {
             console.error('AuthProvider: Registration failed:', error.response ? error.response.data : error.message);
-            await logout(); // Ensure clean state on failed registration
-            return false; // Indicate failure
+            await logout();
+            return false;
         }
     };
 
@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }) => {
         console.log('AuthProvider: Logging out...');
         setAccessToken(null);
         setUserData(null);
-        setAuthHeader(null); // Clear auth header in axios instance
+        setAuthHeader(null);
         await AsyncStorage.removeItem('access_token');
         await AsyncStorage.removeItem('refresh_token');
         console.log('AuthProvider: Logout complete.');

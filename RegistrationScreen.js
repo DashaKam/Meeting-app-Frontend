@@ -12,10 +12,10 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
-import { useAuth } from './AuthContext'; // Import useAuth
+import { useAuth } from './AuthContext';
 
 const RegistrationScreen = ({ navigation }) => {
-  const { register } = useAuth(); // Get register function from context
+  const { register } = useAuth();
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');

@@ -21,7 +21,6 @@ const AuthStack = () => (
 
 // Authenticated users
 const AppStack = () => (
-    // Default to Profile for logged in users
     <AppStackNav.Navigator initialRouteName="Profile">
         <AppStackNav.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
         <AppStackNav.Screen name="Success" component={SuccessScreen} options={{ headerShown: false }} />
