@@ -13,6 +13,7 @@ import {
   Keyboard,
 } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegistrationScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -79,8 +80,15 @@ const RegistrationScreen = ({ navigation }) => {
       );
 
       console.log('Регистрация успешна:', response.data);
+
+      if (response.data.access_token && response.data.refresh_token) {
+        await AsyncStorage.setItem('access_token', response.data.access_token);
+        await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
+        console.log('Токены сохранены в AsyncStorage');
+      }
+
       Alert.alert('Успех', 'Вы успешно зарегистрированы!');
-      navigation.navigate('Success');
+      navigation.navigate('Profile');
     } catch (error) {
       console.error('Ошибка регистрации:', error);
       Alert.alert(

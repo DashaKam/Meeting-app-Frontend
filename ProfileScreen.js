@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,57 +6,125 @@ import {
     TouchableOpacity,
     StyleSheet,
     Dimensions,
-    ScrollView, // Импортируем ScrollView
+    ScrollView,
+    ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import PlaceholderImage from './assets/544.jpg';
 
-const images = [
-    require('./assets/544.jpg'),
-    require('./assets/544.jpg'),
-    require('./assets/544.jpg'),
-];
-
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
     const [activeSlide, setActiveSlide] = useState(0);
+    const [userData, setUserData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            setIsLoading(true);
+            try {
+                const accessToken = await AsyncStorage.getItem('access_token');
+                if (!accessToken) {
+                    console.log('Access token not found in storage.');
+                    navigation.navigate('Login');
+                    return;
+                }
+
+                console.log('Fetching user data with token:', accessToken);
+
+                const response = await axios.get('http://185.157.214.169:8888/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                console.log('User data response:', response.data);
+                setUserData(response.data);
+            } catch (error) {
+                console.error('Error fetching user data:', error.response ? error.response.data : error.message);
+                if (error.response && error.response.status === 401) {
+                    console.log('Unauthorized or token expired. Clearing tokens.');
+                    await AsyncStorage.removeItem('access_token');
+                    await AsyncStorage.removeItem('refresh_token');
+                    navigation.navigate('Login');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    const getDerivedImageSources = () => {
+        if (userData?.photo_urls?.length > 0) {
+            return userData.photo_urls.map(url => ({ uri: url }));
+        } else {
+            return [PlaceholderImage];
+        }
+    };
+    
+    const imageSources = getDerivedImageSources();
+    const hasMultipleImages = imageSources.length > 1 && imageSources[0] !== PlaceholderImage;
 
     const handleImagePress = () => {
-        setActiveSlide((prev) => (prev + 1) % images.length);
+        if (hasMultipleImages) {
+            setActiveSlide((prev) => (prev + 1) % imageSources.length);
+        }
     };
+
+    if (isLoading) {
+        return (
+            <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+                <ActivityIndicator size="large" color="#645BAA" />
+            </SafeAreaView>
+        );
+    }
+    
+    if (!isLoading && !userData) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <Text>Не удалось загрузить профиль.</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.button}>
+                    <Text style={styles.buttonText}>Вернуться ко входу</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Окно для фотографии */}
             <TouchableOpacity
                 onPress={handleImagePress}
+                activeOpacity={hasMultipleImages ? 0.2 : 1.0}
                 style={styles.imageContainer}>
-                <Image source={images[activeSlide]} style={styles.image} />
+                <Image source={imageSources[activeSlide]} style={styles.image} />
                 <View style={styles.infoContainer}>
-                    <Text style={styles.infoText}>Иван</Text>
-                    <Text style={styles.infoText}>Оценка: 5</Text>
-                    <Text style={styles.infoText}>Спорт, Музыка</Text>
+                    <Text style={styles.infoText}>{userData?.name || 'Имя'}</Text>
+                    <Text style={styles.infoText}>Оценка: {userData?.rating?.toFixed(1) || 'N/A'}</Text>
+                    <Text style={styles.infoText}>{userData?.tags?.join(', ') || 'Интересы'}</Text>
                 </View>
             </TouchableOpacity>
 
-            {/* Индикаторы текущего слайда */}
-            <View style={styles.indicatorContainer}>
-                {images.map((_, index) => (
-                    <View
-                        key={index}
-                        style={[
-                            styles.indicator,
-                            activeSlide === index
-                                ? styles.activeIndicator
-                                : styles.inactiveIndicator,
-                        ]}
-                    />
-                ))}
-            </View>
+            {hasMultipleImages && (
+                <View style={styles.indicatorContainer}>
+                    {imageSources.map((_, index) => (
+                        <View
+                            key={index}
+                            style={[
+                                styles.indicator,
+                                activeSlide === index
+                                    ? styles.activeIndicator
+                                    : styles.inactiveIndicator,
+                            ]}
+                        />
+                    ))}
+                </View>
+            )}
 
-            {/* Прокручиваемая область для кнопок */}
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {/* Кнопки действий */}
                 {[
                     'Редактировать анкету',
                     'Избранные мероприятия',
@@ -72,7 +140,6 @@ const ProfileScreen = () => {
                 ))}
             </ScrollView>
 
-            {/* Панель навигации */}
             <View style={[styles.navBar]}>
                 {[
                     {
@@ -128,12 +195,11 @@ const ProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
         paddingHorizontal: 20,
         backgroundColor: '#FFE4C4',
-        justifyContent: "space-between", // Обеспечивает равномерное распределение пространства между элементами
+        justifyContent: "space-between",
     },
 
     imageContainer: {
@@ -170,36 +236,45 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         marginVertical: -40,
-
     },
 
-    indicator:{
-        width :8 ,
-        height :8 ,
-        borderRadius :4 ,
-        marginHorizontal :5 ,
+    indicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginHorizontal: 5,
     },
 
-    activeIndicator:{
-        backgroundColor:'#000000',},
-    inactiveIndicator:{
-        backgroundColor:'#FFFFFF',},
-    buttonContainer:{
-        marginTop :50,},
-    button:{
-        paddingVertical :10 ,
-        paddingHorizontal :10 ,
-        borderRadius :5 ,
-        marginVertical :1 ,},
-    buttonText:{
-        color:'#000',
-//1080 x2400 пикселей
-        fontSize :0.025 *(Dimensions.get('window').height),},
-    navBar:{
-        flexDirection:'row',justifyContent:'space-around',alignItems:'center',backgroundColor:'#FFFFFF',paddingVertical :1 ,borderTopWidth :1 ,borderTopColor:'#E0E0E0',borderRadius :10 ,overflow:'hidden',},navItem:{alignItems:'center',},navItemLabel:{fontSize :10,},
-    scrollContainer:{
-        flexGrow :1 , // Позволяет ScrollView занимать все доступное пространство
-        justifyContent :'flex-start' // Начинаем с верхней части ScrollView
-    },});
+    activeIndicator: {
+        backgroundColor: '#000000',
+    },
+    inactiveIndicator: {
+        backgroundColor: '#FFFFFF',
+    },
+    buttonContainer: {
+        marginTop: 50,
+    },
+    button: {
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        marginVertical: 1,
+    },
+    buttonText: {
+        color: '#000',
+        fontSize: 0.025 * (Dimensions.get('window').height),
+    },
+    navBar: {
+        flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#FFFFFF', paddingVertical: 1, borderTopWidth: 1, borderTopColor: '#E0E0E0', borderRadius: 10, overflow: 'hidden',
+    }, navItem: { alignItems: 'center', }, navItemLabel: { fontSize: 10, },
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'flex-start'
+    },
+    loadingContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
 
 export default ProfileScreen;
