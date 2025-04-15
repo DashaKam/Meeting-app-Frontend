@@ -19,9 +19,11 @@ const RegistrationScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // Новое состояние для повторного пароля
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState(''); // Ошибка для повторного пароля
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   // Состояние для отслеживания фокуса на полях
@@ -51,6 +53,7 @@ const RegistrationScreen = ({ navigation }) => {
     setNameError('');
     setPhoneError('');
     setPasswordError('');
+    setConfirmPasswordError(''); // Сброс ошибки для повторного пароля
 
     if (!validateName(name)) {
       setNameError('Ваше имя слишком короткое :(');
@@ -67,6 +70,11 @@ const RegistrationScreen = ({ navigation }) => {
       valid = false;
     }
 
+    if (password !== confirmPassword) { // Проверка совпадения паролей
+      setConfirmPasswordError('Пароли не совпадают.');
+      valid = false;
+    }
+
     if (!valid) return;
 
     // Add a loading state if desired
@@ -78,11 +86,11 @@ const RegistrationScreen = ({ navigation }) => {
       console.log('Registration successful, navigation handled by context.');
       // Navigation is handled by AppNavigator based on AuthContext state
       // navigation.navigate('Profile'); // Usually not needed here
-      Alert.alert('Успех', 'Вы успешно зарегистрированы!'); // Keep success alert
+      //  Alert.alert('Успех', 'Вы успешно зарегистрированы!');
     } else {
       Alert.alert(
-        'Ошибка',
-        'Не удалось зарегистрироваться. Попробуйте еще раз.'
+          'Ошибка',
+          'Не удалось зарегистрироваться. Попробуйте еще раз.'
       );
     }
   };
@@ -90,17 +98,17 @@ const RegistrationScreen = ({ navigation }) => {
   // Обработка событий клавиатуры
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      }
+        'keyboardDidShow',
+        () => {
+          setKeyboardVisible(true);
+        }
     );
 
     const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      }
+        'keyboardDidHide',
+        () => {
+          setKeyboardVisible(false);
+        }
     );
 
     return () => {
@@ -145,64 +153,74 @@ const RegistrationScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('./assets/544.jpg')}
-      style={styles.background}>
+      <ImageBackground
+          source={require('./assets/544.jpg')}
+          style={styles.background}>
 
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={keyboardVisible ? 100 : 0}
-      >
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Скорее регистрируйся!</Text>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={keyboardVisible ? 100 : 0}
+        >
+          <View style={styles.formContainer}>
+            <Text style={styles.title}>Скорее регистрируйся!</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Как тебя зовут?"
-            value={name}
-            onChangeText={setName}
-            onFocus={handleFocusName}
-            placeholderTextColor="#CE9FDD"
-          />
-          {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
+            <TextInput
+                style={styles.input}
+                placeholder="Как тебя зовут?"
+                value={name}
+                onChangeText={setName}
+                onFocus={handleFocusName}
+                placeholderTextColor="#CE9FDD"
+            />
+            {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
 
-          <TextInput
-            style={styles.input}
-            placeholder="Оставь свой номерок телефона"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            onFocus={handlePhoneFocus}
-            placeholderTextColor="#CE9FDD"
-          />
-          {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+            <TextInput
+                style={styles.input}
+                placeholder="Оставь свой номерок телефона"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                onFocus={handlePhoneFocus}
+                placeholderTextColor="#CE9FDD"
+            />
+            {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
-          <TextInput
-            style={styles.input}
-            placeholder="Придумай пароль"
-            value={password}
-            onChangeText={setPassword}
-            onFocus={handleFocusPassword}
-            secureTextEntry
-            placeholderTextColor="#CE9FDD"
-          />
-          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+            <TextInput
+                style={styles.input}
+                placeholder="Придумай пароль"
+                value={password}
+                onChangeText={setPassword}
+                onFocus={handleFocusPassword}
+                secureTextEntry
+                placeholderTextColor="#CE9FDD"
+            />
+            {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Зарегистрироваться</Text>
-          </TouchableOpacity>
+            <TextInput
+                style={styles.input}
+                placeholder="Повтори пароль"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                placeholderTextColor="#CE9FDD"
+            />
+            {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
 
-          <View style={styles.linkContainer}>
-            <Text style={styles.linkText}>Уже есть аккаунт? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.link}>Скорее заходи!</Text>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Зарегистрироваться</Text>
             </TouchableOpacity>
+
+            <View style={styles.linkContainer}>
+              <Text style={styles.linkText}>Уже есть аккаунт? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.link}>Скорее заходи!</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
 
-    </ImageBackground>
+      </ImageBackground>
 
   );
 };
@@ -242,47 +260,44 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
     borderWidth: 1,
     borderRadius: 25,
-    paddingHorizontal: 10,
-    marginBottom: 20,
+    paddingHorizontal:10,
+    marginBottom:1,
+    marginTop:15,
   },
 
   button: {
-    backgroundColor: '#fff',
-    width: '80%',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor:'#fff',
+    width:'80%',
+    borderRadius:20,
+    paddingVertical:10,
+    marginTop:20,
     alignItems: 'center',
   },
 
-  buttonText: {
-    color: '#645BAA',
-    fontSize: 25,
+  buttonText:{
+    color:'#645BAA',
+    fontSize:25,
+
   },
 
-  linkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 15,
+  linkContainer:{
+    flexDirection:'row',
+    justifyContent:'center',
+    marginTop:15,
   },
 
-  linkText: {
-    color: '#937EC3',
-    fontSize: 16,
+  link:{
+    color:'#4D3FB7',
+    fontSize:16,
+    textDecorationLine:'underline',
   },
 
-  link: {
-    color: '#4D3FB7',
-    fontSize: 16,
-    textDecorationLine: 'underline',
-  },
-
-  errorText: {
-    color: 'red',
-    fontSize: 14,
-    marginBottom: 10, // Положительный отступ для создания пространства между полем ввода и сообщением об ошибке
-    width: '80%', // Ширина сообщения об ошибке равна ширине поля ввода
-    textAlign: 'left', // Выравнивание текста по левому краю
+  errorText:{
+    color:'red',
+    fontSize:14,
+    marginBottom:1,// Положительный отступ для создания пространства между полем ввода и сообщением об ошибке
+    width:'80%',// Ширина сообщения об ошибке равна ширине поля ввода
+    textAlign:'left',// Выравнивание текста по левому краю
   },
 });
 
