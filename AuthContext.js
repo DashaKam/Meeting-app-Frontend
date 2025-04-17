@@ -1,162 +1,323 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    Text,
+    SafeAreaView,
+    StyleSheet,
+    TextInput,
+    Alert,
+    ImageBackground,
+    View,
+    TouchableOpacity,
+    KeyboardAvoidingView,
+    Platform,
+    Keyboard,
+} from 'react-native';
+import { useAuth } from './AuthContext';
 
-const AuthContext = createContext();
+const RegistrationScreen = ({ navigation }) => {
+    const { register } = useAuth();
+    const [name, setName] = useState('');
+    const [username, setUserName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState(''); // Новое состояние для повторного пароля
+    const [nameError, setNameError] = useState('');
+    const [userNameError, setUserNameError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState(''); // Ошибка для повторного пароля
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-export const AuthProvider = ({ children }) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [accessToken, setAccessToken] = useState(null);
-    const [userData, setUserData] = useState(null);
+    // Состояние для отслеживания фокуса на полях
+    const [isNameFocused, setIsNameFocused] = useState(false);
+    const [isUserNameFocused, setIsUserNameFocused] = useState(false);
+    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-    const api = axios.create({
-        baseURL: 'http://185.157.214.169:8888',
-    });
+    // Валидация name
+    const validateName = (name) => {
+        return name.length >= 3;
+    };
 
-    // Function to set Authorization header
-    const setAuthHeader = (token) => {
-        if (token) {
-            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    // Валидация ника
+    const validateUserName = (username) => {
+        return username.length >= 3;
+    };
+    // Валидация email
+    const validateEmail = (email) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
+    };
+
+    // Валидация пароля
+    const validatePassword = (password) => {
+        return /^(?=.*[a-zA-Z])(?=.*\d).+$/.test(password);
+    };
+
+    // Обработка отправки формы
+    const handleSubmit = async () => {
+        let valid = true;
+
+        setNameError('');
+        setUserNameError('');
+        setEmailError('');
+        setPasswordError('');
+        setConfirmPasswordError(''); // Сброс ошибки для повторного пароля
+
+        if (!validateName(name)) {
+            setNameError('Ваше имя слишком короткое :(');
+            valid = false;
+        }
+
+        if (!validateUserName(username)) {
+            setUserNameError('Никнейм слишком короткий:(');
+            valid = false;
+        }
+
+        if (!validateEmail(email)) {
+            setEmailError('Ваша почта не соответсвует шаблону:(');
+            valid = false;
+        }
+
+        if (!validatePassword(password)) {
+            setPasswordError('Пароль должен содержать буквы и цифры.');
+            valid = false;
+        }
+
+        if (password !== confirmPassword) { // Проверка совпадения паролей
+            setConfirmPasswordError('Пароли не совпадают.');
+            valid = false;
+        }
+
+        if (!valid) return;
+
+        // Add a loading state if desired
+        // setIsLoading(true);
+        const success = await register(name, username, email, password);
+        // setIsLoading(false);
+
+        if (success) {
+            console.log('Registration successful, navigation handled by context.');
+            // Navigation is handled by AppNavigator based on AuthContext state
+            // navigation.navigate('Profile'); // Usually not needed here
+            //  Alert.alert('Успех', 'Вы успешно зарегистрированы!');
         } else {
-            delete api.defaults.headers.common['Authorization'];
+            Alert.alert(
+                'Ошибка',
+                'Не удалось зарегистрироваться. Попробуйте еще раз.'
+            );
         }
     };
 
-    // Fetch User Data
-    const fetchUserData = async (token) => {
-        if (!token) return;
-        try {
-            console.log('AuthProvider: Fetching user data...');
-            setAuthHeader(token);
-            const response = await api.get('/users/me');
-            setUserData(response.data);
-            console.log('AuthProvider: User data fetched successfully.');
-        } catch (error) {
-            console.error('AuthProvider: Error fetching user data:', error.response ? error.response.data : error.message);
-            // If fetching user data fails with the current token, treat as unauthenticated
-            await logout();
-        }
-    };
-
-    // Check initial auth status on mount
+    // Обработка событий клавиатуры
     useEffect(() => {
-        const checkAuthStatus = async () => {
-            setIsLoading(true);
-            let storedAccessToken = null;
-            try {
-                const refreshToken = await AsyncStorage.getItem('refresh_token');
-                storedAccessToken = await AsyncStorage.getItem('access_token');
-
-                if (refreshToken) {
-                    console.log('AuthProvider: Refresh token found, attempting refresh...');
-                    try {
-                        const response = await api.post('/auth/refresh', { refresh_token: refreshToken });
-                        const newAccessToken = response.data.access_token;
-                        await AsyncStorage.setItem('access_token', newAccessToken);
-                        setAccessToken(newAccessToken);
-                        await fetchUserData(newAccessToken);
-                        console.log('AuthProvider: Token refresh successful.');
-                    } catch (refreshError) {
-                        console.error('AuthProvider: Refresh token failed:', refreshError.response ? refreshError.response.data : refreshError.message);
-                        // Clear tokens if refresh fails
-                        await logout();
-                    }
-                } else if (storedAccessToken) {
-                    console.log('AuthProvider: Access token found (no refresh token), verifying...');
-                    // Verify existing access token by fetching user data
-                    setAccessToken(storedAccessToken);
-                    await fetchUserData(storedAccessToken);
-                } else {
-                    console.log('AuthProvider: No tokens found.');
-                    // Ensure state is clean if no tokens
-                    setAccessToken(null);
-                    setUserData(null);
-                    setAuthHeader(null);
-                }
-            } catch (error) {
-                console.error('AuthProvider: Error checking auth status:', error);
-                await logout();
-            } finally {
-                setIsLoading(false);
+        const keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            () => {
+                setKeyboardVisible(true);
             }
+        );
+
+        const keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            () => {
+                setKeyboardVisible(false);
+            }
+        );
+
+        return () => {
+            keyboardDidHideListener.remove();
+            keyboardDidShowListener.remove();
         };
-        checkAuthStatus();
     }, []);
 
-    const login = async (phone_number, password) => {
-        try {
-            console.log('AuthProvider: Attempting login...');
-            const response = await api.post('/auth/login', { phone_number, password });
-            const { access_token, refresh_token } = response.data;
-            await AsyncStorage.setItem('access_token', access_token);
-            await AsyncStorage.setItem('refresh_token', refresh_token);
-            setAccessToken(access_token);
-            await fetchUserData(access_token);
-            console.log('AuthProvider: Login successful.');
-            return true;
-        } catch (error) {
-            console.error('AuthProvider: Login failed:', error.response ? error.response.data : error.message);
-            await logout();
-            return false;
+    // Обработка фокуса на никнейме
+    const handleUserNameFocus = () => {
+        if (!isUserNameFocused) {
+            setUserName('@');
+            setIsUserNameFocused(true);
+        }
+        // Сброс ошибки при фокусировке
+        if (userNameError) {
+            setUserNameError('');
         }
     };
 
-    const register = async (name, phone_number, password) => {
-        try {
-            console.log('AuthProvider: Attempting registration...');
-            const response = await api.post('/auth/register', { name, phone_number, password });
-            const { access_token, refresh_token } = response.data;
-            await AsyncStorage.setItem('access_token', access_token);
-            await AsyncStorage.setItem('refresh_token', refresh_token);
-            setAccessToken(access_token);
-            await fetchUserData(access_token);
-            console.log('AuthProvider: Registration successful.');
-            return true;
-        } catch (error) {
-            console.error('AuthProvider: Registration failed:', error.response ? error.response.data : error.message);
-            await logout();
-            return false;
+    // Обработка фокуса на других полях
+    const handleFocusName = () => {
+        if (!isNameFocused) {
+            setName('');
+            setIsNameFocused(true);
+        }
+        // Сброс ошибки при фокусировке
+        if (nameError) {
+            setNameError('');
         }
     };
 
-
-    const logout = async () => {
-        console.log('AuthProvider: Logging out...');
-        setAccessToken(null);
-        setUserData(null);
-        setAuthHeader(null);
-        await AsyncStorage.removeItem('access_token');
-        await AsyncStorage.removeItem('refresh_token');
-        console.log('AuthProvider: Logout complete.');
+    const handleFocusPassword = () => {
+        if (!isPasswordFocused) {
+            setPassword('');
+            setIsPasswordFocused(true);
+        }
+        // Сброс ошибки при фокусировке
+        if (passwordError) {
+            setPasswordError('');
+        }
     };
-
-    // Render loading indicator while checking auth status
-    if (isLoading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#645BAA" />
-            </View>
-        );
-    }
 
     return (
-        <AuthContext.Provider value={{ accessToken, userData, isLoading, login, logout, register }}>
-            {children}
-        </AuthContext.Provider>
+        <ImageBackground
+            source={require('./assets/544.jpg')}
+            style={styles.background}>
+
+            <KeyboardAvoidingView
+                style={styles.container}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={keyboardVisible ? 100 : 0}
+            >
+                <View style={styles.formContainer}>
+                    <Text style={styles.title}>Скорее регистрируйся!</Text>
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Как тебя зовут?"
+                        value={name}
+                        onChangeText={setName}
+                        onFocus={handleFocusName}
+                        placeholderTextColor="#CE9FDD"
+                    />
+                    {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Придумай никнейм"
+                        value={username}
+                        onChangeText={setUserName}
+                        onFocus={handleUserNameFocus}
+                        placeholderTextColor="#CE9FDD"
+                    />
+                    {userNameError ? <Text style={styles.errorText}>{userNameError}</Text> : null}
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Поделись своей электронной почтой"
+                        value={email}
+                        onChangeText={setEmail} // Обновление состояния для email
+                        placeholderTextColor="#CE9FDD"
+                    />
+                    {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Придумай пароль"
+                        value={password}
+                        onChangeText={setPassword}
+                        onFocus={handleFocusPassword}
+                        secureTextEntry
+                        placeholderTextColor="#CE9FDD"
+                    />
+                    {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Повтори пароль"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry
+                        placeholderTextColor="#CE9FDD"
+                    />
+                    {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
+
+                    <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                        <Text style={styles.buttonText}>Зарегистрироваться</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.linkContainer}>
+                        <Text style={styles.linkText}>Уже есть аккаунт? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                            <Text style={styles.link}>Скорее заходи!</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+            </KeyboardAvoidingView>
+
+        </ImageBackground>
+
     );
 };
 
-// Hook to use auth context
-export const useAuth = () => {
-    return useContext(AuthContext);
-};
-
 const styles = StyleSheet.create({
-    loadingContainer: {
+    background: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#FFE4C4', // Match profile background?
     },
-}); 
+
+    container: {
+        flex: 1,
+        padding: 16,
+    },
+
+    formContainer: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginTop: 50,
+    },
+
+    title: {
+        fontSize: 40,
+        fontWeight: 'regular',
+        textAlign: 'center',
+        textbackgroundColor: '#ccc',
+        marginBottom: 16,
+        color: '#645BAA',
+    },
+
+    input: {
+        height: 50,
+        width: '80%',
+        backgroundColor: '#fff',
+        color: '#CE9FDD',
+        borderColor: '#fff',
+        borderWidth: 1,
+        borderRadius: 25,
+        paddingHorizontal:10,
+        marginBottom:1,
+        marginTop:15,
+    },
+
+    button: {
+        backgroundColor:'#fff',
+        width:'80%',
+        borderRadius:20,
+        paddingVertical:10,
+        marginTop:20,
+        alignItems: 'center',
+    },
+
+    buttonText:{
+        color:'#645BAA',
+        fontSize:25,
+
+    },
+
+    linkContainer:{
+        flexDirection:'row',
+        justifyContent:'center',
+        marginTop:15,
+    },
+
+    link:{
+        color:'#4D3FB7',
+        fontSize:16,
+        textDecorationLine:'underline',
+    },
+
+    errorText:{
+        color:'red',
+        fontSize:14,
+        marginBottom:1,// Положительный отступ для создания пространства между полем ввода и сообщением об ошибке
+        width:'80%',// Ширина сообщения об ошибке равна ширине поля ввода
+        textAlign:'left',// Выравнивание текста по левому краю
+    },
+});
+
+export default RegistrationScreen;
