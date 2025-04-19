@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { API_ENDPOINTS } from '../constants/api';
+import api, { setAuthHeader } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -10,24 +11,14 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [userData, setUserData] = useState(null);
 
-  const api = axios.create({
-    baseURL: 'http://185.157.214.169:8888',
-  });
 
-  const setAuthHeader = (token) => {
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete api.defaults.headers.common['Authorization'];
-    }
-  };
 
   const fetchUserData = async (token) => {
     if (!token) return;
     try {
       console.log('AuthProvider: Fetching user data...');
       setAuthHeader(token);
-      const response = await api.get('/users/me');
+      const response = await api.get(API_ENDPOINTS.PROFILE);
       setUserData(response.data);
       console.log('AuthProvider: User data fetched successfully.');
     } catch (error) {
@@ -49,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         if (refreshToken) {
           console.log('AuthProvider: Refresh token found, attempting refresh...');
           try {
-            const response = await api.post('/auth/refresh', { refresh_token: refreshToken });
+            const response = await api.post(API_ENDPOINTS.REFRESH, { refresh_token: refreshToken });
             const newAccessToken = response.data.access_token;
             await AsyncStorage.setItem('access_token', newAccessToken);
             setAccessToken(newAccessToken);
@@ -85,7 +76,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (phone_number, password) => {
     try {
       console.log('AuthProvider: Attempting login...');
-      const response = await api.post('/auth/login', { phone_number, password });
+      const response = await api.post(API_ENDPOINTS.LOGIN, { phone_number, password });
       const { access_token, refresh_token } = response.data;
       await AsyncStorage.setItem('access_token', access_token);
       await AsyncStorage.setItem('refresh_token', refresh_token);
@@ -103,7 +94,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, username, email, password) => {
     try {
       console.log('AuthProvider: Attempting registration...');
-      const response = await api.post('/auth/register', { name, username, email, password });
+      const response = await api.post(API_ENDPOINTS.REGISTER, { name, username, email, password });
       const { access_token, refresh_token } = response.data;
       await AsyncStorage.setItem('access_token', access_token);
       await AsyncStorage.setItem('refresh_token', refresh_token);
