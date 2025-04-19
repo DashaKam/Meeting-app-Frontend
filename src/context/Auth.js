@@ -11,8 +11,6 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [userData, setUserData] = useState(null);
 
-
-
   const fetchUserData = async (token) => {
     if (!token) return;
     try {
@@ -73,10 +71,24 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  const login = async (phone_number, password) => {
+  const login = async (username, password) => {
     try {
       console.log('AuthProvider: Attempting login...');
-      const response = await api.post(API_ENDPOINTS.LOGIN, { phone_number, password });
+
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+
+      const response = await api.post(
+        API_ENDPOINTS.LOGIN,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+
       const { access_token, refresh_token } = response.data;
       await AsyncStorage.setItem('access_token', access_token);
       await AsyncStorage.setItem('refresh_token', refresh_token);
@@ -138,7 +150,11 @@ export const AuthProvider = ({ children }) => {
 
 // Hook to use auth context
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
 
 const styles = StyleSheet.create({

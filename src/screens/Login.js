@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/Auth';
-import { validatePassword, validateUserName } from './Registration';
+import { validatePassword, validateUserName } from '../utils/validation';
 
 const LoginScreen = ({ navigation }) => {
   const { login } = useAuth();
@@ -28,7 +28,6 @@ const LoginScreen = ({ navigation }) => {
       );
     }
   };
-
 
   // TODO: Добавить нормальную верстку и нормальную валидацию
   //       Временное решение, чтобы было удобно входить для тестирования

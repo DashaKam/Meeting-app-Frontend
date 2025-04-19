@@ -12,6 +12,7 @@ import {
   View
 } from 'react-native';
 import { useAuth } from '../context/Auth';
+import { validateEmail, validateName, validatePassword, validateUserName } from '../utils/validation';
 
 const RegistrationScreen = ({ navigation }) => {
   const { register } = useAuth();
@@ -31,25 +32,6 @@ const RegistrationScreen = ({ navigation }) => {
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [isUserNameFocused, setIsUserNameFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-
-  // Валидация name
-  const validateName = (name) => {
-    return name.length >= 3;
-  };
-
-  // Валидация ника
-  const validateUserName = (username) => {
-    return username.length >= 3;
-  };
-  // Валидация email
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
-  };
-
-  // Валидация пароля
-  const validatePassword = (password) => {
-    return /^(?=.*[a-zA-Z])(?=.*\d).+$/.test(password);
-  };
 
   // Обработка отправки формы
   const handleSubmit = async () => {
