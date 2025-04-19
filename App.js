@@ -4,6 +4,7 @@ import React from 'react';
 import { AuthProvider, useAuth } from './AuthContext';
 
 import LoginScreen from './LoginScreen';
+import PeopleSwipeScreen from './PeopleSwipeScreen';
 import ProfileScreen from './ProfileScreen';
 import RegistrationScreen from './RegistrationScreen';
 import SuccessScreen from './SuccessScreen';
