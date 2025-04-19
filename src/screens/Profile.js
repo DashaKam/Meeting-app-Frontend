@@ -65,7 +65,7 @@ const ProfileScreen = () => {
         ))}
       </ScrollView>
 
-      <BottomNavBar currentScreen="Profile" />
+      <BottomNavBar currentScreen="Profile" activeColor="#FFE4C4" />
     </SafeAreaView>
   );
 };

@@ -42,9 +42,8 @@ const navItemsData = [
     },
 ];
 
-const BottomNavBar = ({ currentScreen }) => {
+const BottomNavBar = ({ currentScreen, activeColor }) => {
     const navigation = useNavigation();
-    const activeColor = '#FFE4C4';
     const inactiveColor = '#828282';
 
     return (
