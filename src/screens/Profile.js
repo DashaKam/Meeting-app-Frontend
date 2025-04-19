@@ -9,9 +9,8 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import PlaceholderImage from '../assets/544.jpg';
+import BottomNavBar from '../components/BottomNavBar';
 import { useAuth } from '../context/Auth';
 
 const ProfileScreen = ({ navigation }) => {
@@ -97,56 +96,7 @@ const ProfileScreen = ({ navigation }) => {
                 ))}
             </ScrollView>
 
-            <View style={[styles.navBar]}>
-                {[
-                    {
-                        icon: 'auto-awesome-mosaic',
-                        label: 'Подборки',
-                        library: 'MaterialIcons',
-                    },
-                    {
-                        icon: 'account-group-outline',
-                        label: 'Люди',
-                        library: 'MaterialCommunityIcons',
-                    },
-                    {
-                        icon: 'calendar-month',
-                        label: 'Мои мероприятия',
-                        library: 'MaterialCommunityIcons',
-                    },
-                    {
-                        icon: 'auto-awesome-motion',
-                        label: 'Мероприятия',
-                        library: 'MaterialIcons',
-                    },
-                    {
-                        icon: 'account-heart-outline',
-                        label: 'Профиль',
-                        library: 'MaterialCommunityIcons',
-                    },
-                ].map((item, index) => (
-                    <TouchableOpacity key={index} style={[styles.navItem]}>
-                        {item.label !== 'Профиль' &&
-                            (item.library === 'MaterialCommunityIcons' ? (
-                                <MaterialCommunityIcons
-                                    name={item.icon}
-                                    size={30}
-                                    color="#828282"
-                                />
-                            ) : (
-                                <MaterialIcons name={item.icon} size={30} color="#828282" />
-                            ))}
-                        {item.label === 'Профиль' && (
-                            <MaterialCommunityIcons
-                                name="account-heart-outline"
-                                size={30}
-                                color="#FFE4C4"
-                            />
-                        )}
-                        <Text style={styles.navItemLabel}>{item.label}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+            <BottomNavBar currentScreen="Profile" />
         </SafeAreaView>
     );
 };
@@ -192,7 +142,8 @@ const styles = StyleSheet.create({
     indicatorContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginVertical: -40,
+        marginBottom: 10,
+        marginTop: 10,
     },
 
     indicator: {
@@ -208,9 +159,6 @@ const styles = StyleSheet.create({
     inactiveIndicator: {
         backgroundColor: '#FFFFFF',
     },
-    buttonContainer: {
-        marginTop: 50,
-    },
     button: {
         paddingVertical: 10,
         paddingHorizontal: 10,
@@ -219,11 +167,8 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#000',
-        fontSize: 0.025 * (Dimensions.get('window').height),
+        fontSize: 0.02 * (Dimensions.get('window').height),
     },
-    navBar: {
-        flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#FFFFFF', paddingVertical: 1, borderTopWidth: 1, borderTopColor: '#E0E0E0', borderRadius: 10, overflow: 'hidden',
-    }, navItem: { alignItems: 'center', }, navItemLabel: { fontSize: 10, },
     scrollContainer: {
         flexGrow: 1,
         justifyContent: 'flex-start'
