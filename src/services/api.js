@@ -59,7 +59,6 @@ export const refreshToken = async (refresh_token) => {
 
 export const fetchUserProfile = async () => {
   try {
-    // Assumes setAuthHeader has been called previously with a valid token
     const response = await api.get(API_ENDPOINTS.PROFILE);
     return response.data; // User data object
   } catch (error) {
