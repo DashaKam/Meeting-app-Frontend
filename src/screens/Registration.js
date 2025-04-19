@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
@@ -12,8 +11,8 @@ import {
   View
 } from 'react-native';
 import { useAuth } from '../context/Auth';
+import showAlert from '../utils/alert';
 import { validateEmail, validateName, validatePassword, validateUserName } from '../utils/validation';
-
 const RegistrationScreen = ({ navigation }) => {
   const { register } = useAuth();
   const [name, setName] = useState('');
@@ -79,9 +78,12 @@ const RegistrationScreen = ({ navigation }) => {
     if (success) {
       // Navigation is handled by AppNavigator based on AuthContext state
       // navigation.navigate('Profile'); // Usually not needed here
-      //  Alert.alert('Успех', 'Вы успешно зарегистрированы!');
+      showAlert(
+        'Успех',
+        'Вы успешно зарегистрированы!'
+      );
     } else {
-      Alert.alert(
+      showAlert(
         'Ошибка',
         'Не удалось зарегистрироваться. Попробуйте еще раз.'
       );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../context/Auth';
+import showAlert from '../utils/alert';
 import { validatePassword, validateUserName } from '../utils/validation';
 
 const LoginScreen = ({ navigation }) => {
@@ -11,7 +12,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!validateUserName(username) || !validatePassword(password)) {
-      Alert.alert('Ошибка', 'Пожалуйста, введите действительный никнейм и пароль.');
+      showAlert('Ошибка', 'Пожалуйста, введите действительный никнейм и пароль.');
       return;
     }
 
@@ -22,7 +23,7 @@ const LoginScreen = ({ navigation }) => {
     if (success) {
       console.log('Login successful, navigation handled by context.');
     } else {
-      Alert.alert(
+      showAlert(
         'Ошибка входа',
         'Неверный никнейм или пароль. Попробуйте еще раз.'
       );
