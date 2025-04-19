@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
     StyleSheet,
@@ -18,7 +19,7 @@ const navItemsData = [
     {
         icon: 'account-group-outline',
         label: 'Люди',
-        screenName: 'People',
+        screenName: 'PeopleSwipe',
         library: 'MaterialCommunityIcons',
     },
     {
@@ -42,7 +43,7 @@ const navItemsData = [
 ];
 
 const BottomNavBar = ({ currentScreen }) => {
-    // Define colors for active and inactive states
+    const navigation = useNavigation();
     const activeColor = '#FFE4C4';
     const inactiveColor = '#828282';
 
@@ -54,7 +55,12 @@ const BottomNavBar = ({ currentScreen }) => {
                 const IconComponent = item.library === 'MaterialCommunityIcons' ? MaterialCommunityIcons : MaterialIcons;
 
                 return (
-                    <TouchableOpacity key={index} style={styles.navItem}>
+                    <TouchableOpacity
+                        key={index}
+                        style={styles.navItem}
+                        onPress={() => navigation.navigate(item.screenName)}
+                        disabled={isActive}
+                    >
                         <IconComponent name={item.icon} size={30} color={iconColor} />
                         <Text style={[styles.navItemLabel, { color: iconColor }]}>{item.label}</Text>
                     </TouchableOpacity>

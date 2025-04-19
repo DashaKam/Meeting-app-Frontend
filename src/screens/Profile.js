@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#000',
-        fontSize: 0.02 * (Dimensions.get('window').height),
+        fontSize: 0.025 * (Dimensions.get('window').height),
     },
     scrollContainer: {
         flexGrow: 1,
