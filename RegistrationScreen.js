@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Text,
-    SafeAreaView,
-    StyleSheet,
-    TextInput,
     Alert,
     ImageBackground,
-    View,
-    TouchableOpacity,
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
-    Keyboard,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { useAuth } from './AuthContext';
 

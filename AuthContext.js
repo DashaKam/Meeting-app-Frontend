@@ -1,7 +1,7 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 const AuthContext = createContext();
 
@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
         baseURL: 'http://185.157.214.169:8888',
     });
 
-    // Function to set Authorization header
     const setAuthHeader = (token) => {
         if (token) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -23,7 +22,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Fetch User Data
     const fetchUserData = async (token) => {
         if (!token) return;
         try {

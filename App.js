@@ -1,12 +1,12 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 import { AuthProvider, useAuth } from './AuthContext';
 
-import RegistrationScreen from './RegistrationScreen';
 import LoginScreen from './LoginScreen';
-import SuccessScreen from './SuccessScreen';
 import ProfileScreen from './ProfileScreen';
+import RegistrationScreen from './RegistrationScreen';
+import SuccessScreen from './SuccessScreen';
 
 const AuthStackNav = createNativeStackNavigator();
 const AppStackNav = createNativeStackNavigator();
@@ -24,6 +24,7 @@ const AppStack = () => (
     <AppStackNav.Navigator initialRouteName="Profile">
         <AppStackNav.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
         <AppStackNav.Screen name="Success" component={SuccessScreen} options={{ headerShown: false }} />
+        <AppStackNav.Screen name="PeopleSwipe" component={PeopleSwipeScreen} options={{ headerShown: false }} />
         {/* Add other authenticated screens here */}
     </AppStackNav.Navigator>
 );
