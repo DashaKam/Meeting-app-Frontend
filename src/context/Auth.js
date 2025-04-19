@@ -1,8 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { API_ENDPOINTS } from '../constants/api';
-import api, { setAuthHeader } from '../services/api';
+import {
+  fetchUserProfile,
+  loginUser,
+  refreshToken,
+  registerUser,
+  setAuthHeader
+} from '../services/api';
 
 const AuthContext = createContext();
 
@@ -11,52 +16,47 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [userData, setUserData] = useState(null);
 
-  const fetchUserData = async (token) => {
+  const loadUserProfile = async (token) => {
     if (!token) return;
     try {
-      console.log('AuthProvider: Fetching user data...');
+      console.log('AuthProvider: Fetching user data via service...');
       setAuthHeader(token);
-      const response = await api.get(API_ENDPOINTS.PROFILE);
-      setUserData(response.data);
-      console.log('AuthProvider: User data fetched successfully.');
+      const data = await fetchUserProfile();
+      setUserData(data);
+      console.log('AuthProvider: User data fetched successfully via service.');
     } catch (error) {
-      console.error('AuthProvider: Error fetching user data:', error.response ? error.response.data : error.message);
-      // If fetching user data fails with the current token, treat as unauthenticated
+      console.error('AuthProvider: Error fetching user data via service:', error);
       await logout();
     }
   };
 
-  // Check initial auth status on mount
   useEffect(() => {
     const checkAuthStatus = async () => {
       setIsLoading(true);
       let storedAccessToken = null;
       try {
-        const refreshToken = await AsyncStorage.getItem('refresh_token');
+        const storedRefreshToken = await AsyncStorage.getItem('refresh_token');
         storedAccessToken = await AsyncStorage.getItem('access_token');
 
-        if (refreshToken) {
-          console.log('AuthProvider: Refresh token found, attempting refresh...');
+        if (storedRefreshToken) {
+          console.log('AuthProvider: Refresh token found, attempting refresh via service...');
           try {
-            const response = await api.post(API_ENDPOINTS.REFRESH, { refresh_token: refreshToken });
-            const newAccessToken = response.data.access_token;
+            const refreshData = await refreshToken(storedRefreshToken);
+            const newAccessToken = refreshData.access_token;
             await AsyncStorage.setItem('access_token', newAccessToken);
             setAccessToken(newAccessToken);
-            await fetchUserData(newAccessToken);
-            console.log('AuthProvider: Token refresh successful.');
+            await loadUserProfile(newAccessToken);
+            console.log('AuthProvider: Token refresh successful via service.');
           } catch (refreshError) {
-            console.error('AuthProvider: Refresh token failed:', refreshError.response ? refreshError.response.data : refreshError.message);
-            // Clear tokens if refresh fails
+            console.error('AuthProvider: Refresh token failed via service:', refreshError);
             await logout();
           }
         } else if (storedAccessToken) {
-          console.log('AuthProvider: Access token found (no refresh token), verifying...');
-          // Verify existing access token by fetching user data
+          console.log('AuthProvider: Access token found (no refresh token), verifying via service...');
           setAccessToken(storedAccessToken);
-          await fetchUserData(storedAccessToken);
+          await loadUserProfile(storedAccessToken);
         } else {
           console.log('AuthProvider: No tokens found.');
-          // Ensure state is clean if no tokens
           setAccessToken(null);
           setUserData(null);
           setAuthHeader(null);
@@ -73,31 +73,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      console.log('AuthProvider: Attempting login...');
+      console.log('AuthProvider: Attempting login via service...');
+      const data = await loginUser(username, password);
+      const { access_token, refresh_token } = data;
 
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
-
-      const response = await api.post(
-        API_ENDPOINTS.LOGIN,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
-      );
-
-      const { access_token, refresh_token } = response.data;
       await AsyncStorage.setItem('access_token', access_token);
       await AsyncStorage.setItem('refresh_token', refresh_token);
       setAccessToken(access_token);
-      await fetchUserData(access_token);
-      console.log('AuthProvider: Login successful.');
+      await loadUserProfile(access_token);
+      console.log('AuthProvider: Login successful via service.');
       return true;
     } catch (error) {
-      console.error('AuthProvider: Login failed:', error.response ? error.response.data : error.message);
+      console.error('AuthProvider: Login failed via service:', error);
       await logout();
       return false;
     }
@@ -105,17 +92,18 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, username, email, password) => {
     try {
-      console.log('AuthProvider: Attempting registration...');
-      const response = await api.post(API_ENDPOINTS.REGISTER, { name, username, email, password });
-      const { access_token, refresh_token } = response.data;
+      console.log('AuthProvider: Attempting registration via service...');
+      const data = await registerUser(name, username, email, password);
+      const { access_token, refresh_token } = data;
+
       await AsyncStorage.setItem('access_token', access_token);
       await AsyncStorage.setItem('refresh_token', refresh_token);
       setAccessToken(access_token);
-      await fetchUserData(access_token);
-      console.log('AuthProvider: Registration successful.');
+      await loadUserProfile(access_token);
+      console.log('AuthProvider: Registration successful via service.');
       return true;
     } catch (error) {
-      console.error('AuthProvider: Registration failed:', error.response ? error.response.data : error.message);
+      console.error('AuthProvider: Registration failed via service:', error);
       await logout();
       return false;
     }
@@ -132,7 +120,6 @@ export const AuthProvider = ({ children }) => {
     console.log('AuthProvider: Logout complete.');
   };
 
-  // Render loading indicator while checking auth status
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -148,7 +135,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -162,6 +148,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFE4C4', // Match profile background?
+    backgroundColor: '#FFE4C4',
   },
 });
