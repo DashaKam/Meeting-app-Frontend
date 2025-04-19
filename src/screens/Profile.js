@@ -11,8 +11,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useAuth } from './AuthContext';
-import PlaceholderImage from './assets/544.jpg';
+import PlaceholderImage from '../assets/544.jpg';
+import { useAuth } from '../context/Auth';
 
 const ProfileScreen = ({ navigation }) => {
     const { userData, logout } = useAuth();
