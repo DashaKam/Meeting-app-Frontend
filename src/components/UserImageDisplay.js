@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import PlaceholderImage from '../assets/544.jpg';
+import PlaceholderImage from '../assets/background.jpg';
 
 const UserImageDisplay = ({ imageSources = [PlaceholderImage], userData = {}, containerStyle = {} }) => {
   const [activeSlide, setActiveSlide] = useState(0);

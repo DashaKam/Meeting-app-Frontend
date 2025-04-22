@@ -149,7 +149,7 @@ const RegistrationScreen = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require('../assets/544.jpg')}
+      source={require('../assets/background.jpg')}
       style={styles.background}>
 
       <KeyboardAvoidingView

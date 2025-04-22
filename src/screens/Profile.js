@@ -7,7 +7,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import PlaceholderImage from '../assets/544.jpg';
+import PlaceholderImage from '../assets/background.jpg';
 import BottomNavBar from '../components/BottomNavBar';
 import UserImageDisplay from '../components/UserImageDisplay';
 import { useAuth } from '../context/Auth';

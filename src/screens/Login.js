@@ -1,68 +1,152 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect  } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  StyleSheet
+} from 'react-native-web';
 import { useAuth } from '../context/Auth';
-import showAlert from '../utils/alert';
-import { validatePassword, validateUserName } from '../utils/validation';
+import '../../fonts.css';
+import showAlert from "../utils/alert";
 
 const LoginScreen = ({ navigation }) => {
   const { login } = useAuth();
   const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [userNameError, setUserNameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  const handleLogin = async () => {
-    if (!validateUserName(username) || !validatePassword(password)) {
-      showAlert('Ошибка', 'Пожалуйста, введите действительный никнейм и пароль.');
-      return;
+  const [isUserNameFocused, setIsUserNameFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  const validateUserName = (username) => username.length >= 3;
+  const validatePassword = (password) => /^(?=.*[a-zA-Z])(?=.*\d).+$/.test(password);
+
+  const handleSubmit = async () => {
+    let valid = true;
+    setUserNameError('');
+    setPasswordError('');
+
+    if (!validateUserName(username)) {
+      setUserNameError('Никнейм слишком короткий :(');
+      valid = false;
     }
 
-    setIsLoading(true);
+    if (!validatePassword(password)) {
+      setPasswordError('Пароль должен содержать буквы и цифры.');
+      valid = false;
+    }
+
+    if (!valid) return;
+
     const success = await login(username, password);
-    setIsLoading(false);
+    console.log(success);
 
     if (success) {
-      console.log('Login successful, navigation handled by context.');
-    } else {
       showAlert(
-        'Ошибка входа',
-        'Неверный никнейм или пароль. Попробуйте еще раз.'
+          'Успех',
+          'Вы успешно вошли в аккаунт!'
       );
+    }
+    else {
+      showAlert('Ошибка',
+          'Неверный никнейм или пароль. Попробуйте снова!');
     }
   };
 
-  // TODO: Добавить нормальную верстку и нормальную валидацию
-  //       Временное решение, чтобы было удобно входить для тестирования
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+        'keyboardDidShow',
+        () => setKeyboardVisible(true)
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+        'keyboardDidHide',
+        () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  const handleUserNameFocus = () => {
+    if (!isUserNameFocused) {
+      setUserName('@');
+      setIsUserNameFocused(true);
+    }
+    if (userNameError) {
+      setUserNameError('');
+    }
+  };
+
+  const handlePasswordFocus = () => {
+    if (!isPasswordFocused) {
+      setPasswordError('');
+      setIsPasswordFocused(true);
+    }
+    if (passwordError) {
+      setPasswordError('');
+    }
+  };
+
   return (
-    <View style={styles.formContainer}>
-      <Text style={styles.title}>Вход!</Text>
-      <Text style={styles.message}>Входите!</Text>
-      <TextInput
-        // style={styles.input}
-        placeholder="Введите никнейм"
-        value={username}
-        onChangeText={setUserName}
-        // onFocus={handleUserNameFocus}
-        placeholderTextColor="#CE9FDD"
-      />
-      <TextInput
-        // style={styles.input}
-        placeholder="Введите пароль"
-        value={password}
-        onChangeText={setPassword}
-        // onFocus={handleFocusPassword}
-        secureTextEntry
-        placeholderTextColor="#CE9FDD"
-      />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Вход</Text>
-      </TouchableOpacity>
-      <View style={styles.linkContainer}>
-        <Text style={styles.linkText}>Еще нет аккаунта? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
-          <Text style={styles.link}>Скорее регистрируйся!</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      <ImageBackground
+          source={require('../assets/background.jpg')}
+          style={styles.background}
+      >
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={keyboardVisible ? 100 : 0}
+        >
+          <View style={styles.formContainer}>
+            <Text style={styles.title}>
+              Привет!{'\n'}
+              Мы скучали, скорее заходи :)
+            </Text>
+
+            <TextInput
+                style={styles.inputField}
+                placeholder="Никнейм"
+                value={username}
+                onChangeText={setUserName}
+                onFocus={handleUserNameFocus}
+                placeholderTextColor="#CE9FDD"
+            />
+            {userNameError ? <Text style={styles.errorText}>{userNameError}</Text> : null}
+
+            <TextInput
+                style={styles.inputField}
+                placeholder="Пароль"
+                value={password}
+                onChangeText={setPassword}
+                onFocus={handlePasswordFocus}
+                secureTextEntry
+                placeholderTextColor="#CE9FDD"
+            />
+            {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Навстречу новым эмоциям</Text>
+            </TouchableOpacity>
+
+            <View style={styles.linkContainer}>
+              <Text style={styles.textAboveLink}>Ещё нет аккаунта? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
+                <Text style={styles.link}>Скорее регистрируйся!</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </ImageBackground>
   );
 };
 
@@ -87,17 +171,98 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 40,
-    fontWeight: 'regular',
+    color: '#000',
     textAlign: 'center',
-    textbackgroundColor: '#ccc',
-    marginBottom: 16,
-    color: '#645BAA',
+    fontFamily: 'Evolventa',
+    fontSize: 40,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
+    width: 343,
+    height: 159,
+    flexShrink: 0,
   },
 
-  message: {
-    fontSize: 18,
+  inputField: {
+    width: 298,
+    height: 57,
+    flexShrink: 0,
+    borderRadius: 100,
+    backgroundColor: '#D9D9D9',
+    fontFamily: 'Evolventa',
+    fontSize: 16,
+    paddingHorizontal: 23,
+    marginBottom: 1,
+    marginTop: 15
+  },
+
+  input: {
+    color: '#CE9FDD',
     textAlign: 'center',
+    fontFamily: 'Evolventa',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
+  },
+
+  button: {
+    width: 168,
+    height: 60,
+    flexShrink: 0,
+    borderRadius: 100,
+    backgroundColor: '#000',
+    alignItems: 'center',
+    paddingVertical: 9,
+    marginTop: 20
+  },
+
+  buttonText: {
+    width: 130,
+    height: 41,
+    flexShrink: 0,
+    color: '#FAEBFF',
+    textAlign: 'center',
+    fontFamily: 'Evolventa',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
+  },
+
+  linkContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 15,
+  },
+
+  textAboveLink: {
+    color: '#000',
+    textAlign: 'center',
+    fontFamily: 'Evolventa',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
+  },
+
+  link: {
+    color: 'rgba(242,80,231,0.81)',
+    textAlign: 'center',
+    fontFamily: 'Evolventa',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
+    textDecorationLine: 'underline',
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 1,// Положительный отступ для создания пространства между полем ввода и сообщением об ошибке
+    width: '80%',// Ширина сообщения об ошибке равна ширине поля ввода
+    textAlign: 'center',// Выравнивание текста по центру
   },
 });
 
