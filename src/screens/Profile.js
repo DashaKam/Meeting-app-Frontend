@@ -13,7 +13,7 @@ import UserImageDisplay from '../components/UserImageDisplay';
 import { useAuth } from '../context/Auth';
 import Icon from 'react-native-vector-icons/Octicons';
 
-const Profile = () => {
+const Profile = ({ navigation }) => {
   const { userData, logout } = useAuth();
 
   const getDerivedImageSources = () => {
@@ -28,9 +28,9 @@ const Profile = () => {
 
   if (!userData) {
     return (
-        <SafeAreaView style={[styles.container, styles.loadingContainer]}>
-          <Text>Загрузка данных пользователя...</Text>
-        </SafeAreaView>
+      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+        <Text>Загрузка данных пользователя...</Text>
+      </SafeAreaView>
     );
   }
 
@@ -47,47 +47,47 @@ const Profile = () => {
   };
 
   return (
-      <SafeAreaView style={styles.container}>
-        <UserImageDisplay
-            imageSources={imageSources}
-            userData={userData}
-            containerStyle={styles.userImageContainer}
-        />
+    <SafeAreaView style={styles.container}>
+      <UserImageDisplay
+        imageSources={imageSources}
+        userData={userData}
+        containerStyle={styles.userImageContainer}
+      />
 
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {[
-            'Редактировать анкету',
-            'Может быть интересно',
-            'Настройки',
-            'Поддержка',
-            'Выйти из профиля',
-          ].map((buttonLabel) => (
-              <TouchableOpacity
-                  key={buttonLabel}
-                  style={styles.button}
-                  onPress={() => {
-                    if (buttonLabel === 'Настройки') {
-                      navigation.navigate('Settings'); // Переход на экран "Настройки"
-                    } else if (buttonLabel === 'Выйти из профиля') {
-                      handleLogout();
-                    } else {
-                      console.log(`${buttonLabel} pressed`);
-                    }
-                  }}
-              >
-                <Icon
-                    name={buttonIcons[buttonLabel]}
-                    size={20}
-                    color="#000"
-                    style={styles.icon}
-                />
-                <Text style={styles.buttonText}>{buttonLabel}</Text>
-              </TouchableOpacity>
-          ))}
-        </ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {[
+          'Редактировать анкету',
+          'Может быть интересно',
+          'Настройки',
+          'Поддержка',
+          'Выйти из профиля',
+        ].map((buttonLabel) => (
+          <TouchableOpacity
+            key={buttonLabel}
+            style={styles.button}
+            onPress={() => {
+              if (buttonLabel === 'Настройки') {
+                navigation.navigate('Settings'); // Переход на экран "Настройки"
+              } else if (buttonLabel === 'Выйти из профиля') {
+                handleLogout();
+              } else {
+                console.log(`${buttonLabel} pressed`);
+              }
+            }}
+          >
+            <Icon
+              name={buttonIcons[buttonLabel]}
+              size={20}
+              color="#000"
+              style={styles.icon}
+            />
+            <Text style={styles.buttonText}>{buttonLabel}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-        <BottomNavBar currentScreen="Profile" activeColor="#FFE4C4" />
-      </SafeAreaView>
+      <BottomNavBar currentScreen="Profile" activeColor="#FFE4C4" />
+    </SafeAreaView>
   );
 };
 
