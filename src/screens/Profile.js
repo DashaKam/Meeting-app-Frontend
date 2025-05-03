@@ -65,7 +65,15 @@ const Profile = () => {
               <TouchableOpacity
                   key={buttonLabel}
                   style={styles.button}
-                  onPress={buttonLabel === 'Выйти из профиля' ? handleLogout : () => console.log(`${buttonLabel} pressed`)}
+                  onPress={() => {
+                    if (buttonLabel === 'Настройки') {
+                      navigation.navigate('Settings'); // Переход на экран "Настройки"
+                    } else if (buttonLabel === 'Выйти из профиля') {
+                      handleLogout();
+                    } else {
+                      console.log(`${buttonLabel} pressed`);
+                    }
+                  }}
               >
                 <Icon
                     name={buttonIcons[buttonLabel]}
