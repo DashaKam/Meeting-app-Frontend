@@ -10,7 +10,8 @@ import RegistrationScreen from '../screens/Registration';
 import SuccessScreen from '../screens/Success';
 import SettingsScreen from '../screens/Settings';
 import ChangePasswordScreen from '../screens/ChangePassword';
-
+import ChangeNicknameScreen from '../screens/ChangeNickname';
+import NotificationsScreen from "../screens/Notification";
 
 const AuthStackNav = createNativeStackNavigator();
 const AppStackNav = createNativeStackNavigator();
@@ -31,8 +32,10 @@ const AppStack = () => (
     <AppStackNav.Screen name="PeopleSwipe" component={PeopleSwipeScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="ChangeNickname" component={ChangeNicknameScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
 
-    {/* Add other authenticated screens here */}
+      {/* Add other authenticated screens here */}
   </AppStackNav.Navigator>
 );
 
