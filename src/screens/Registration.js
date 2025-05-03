@@ -248,40 +248,70 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 40,
-    fontWeight: 'regular',
+    color: '#000',
     textAlign: 'center',
-    textbackgroundColor: '#ccc',
-    marginBottom: 16,
-    color: '#645BAA',
+    fontFamily: 'Evolventa',
+    fontSize: 40,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
+    width: 343,
+    height: 159,
+    flexShrink: 0,
   },
 
+  inputField: {
+    width: 298,
+    height: 57,
+    flexShrink: 0,
+    borderRadius: 100,
+    backgroundColor: '#D9D9D9',
+    fontFamily: 'Evolventa',
+    fontSize: 16,
+    paddingHorizontal: 23,
+    marginBottom: 1,
+    marginTop: 15
+  },
   input: {
     height: 50,
     width: '80%',
-    backgroundColor: '#fff',
+    backgroundColor: '#D9D9D9',
     color: '#CE9FDD',
-    borderColor: '#fff',
+    borderColor: '#D9D9D9',
     borderWidth: 1,
     borderRadius: 25,
     paddingHorizontal: 10,
     marginBottom: 1,
     marginTop: 15,
+    textAlign: 'center',
+    fontFamily: 'Evolventa',
+    fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
   },
 
   button: {
-    backgroundColor: '#fff',
-    width: '80%',
-    borderRadius: 20,
-    paddingVertical: 10,
-    marginTop: 20,
+    height: 60,
+    width: '70%',
+    flexShrink: 0,
+    borderRadius: 100,
+    backgroundColor: '#000',
     alignItems: 'center',
+    paddingVertical: 9,
+    marginTop: 20
   },
 
   buttonText: {
-    color: '#645BAA',
-    fontSize: 25,
-
+    width: '50%',
+    flexShrink: 0,
+    color: '#FAEBFF',
+    textAlign: 'center',
+    fontFamily: 'Evolventa',
+    fontSize: 20,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
   },
 
   linkContainer: {
@@ -290,13 +320,24 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
 
-  linkText: {
+  textAboveLink: {
+    color: '#000',
+    textAlign: 'center',
+    fontFamily: 'Evolventa',
     fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
   },
 
   link: {
-    color: '#4D3FB7',
+    color: 'rgba(242,80,231,0.81)',
+    textAlign: 'center',
+    fontFamily: 'Evolventa',
     fontSize: 16,
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: 'normal',
     textDecorationLine: 'underline',
   },
 
@@ -305,8 +346,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 1,// Положительный отступ для создания пространства между полем ввода и сообщением об ошибке
     width: '80%',// Ширина сообщения об ошибке равна ширине поля ввода
-    textAlign: 'left',// Выравнивание текста по левому краю
+    textAlign: 'center',// Выравнивание текста по центру
   },
 });
+
+
+
 
 export default RegistrationScreen;
