@@ -24,7 +24,6 @@ const InterestScreen = ({ navigation }) => {
         const loadInterests = async () => {
             try {
                 const data = await fetchInterests();
-                console.log(data);
                 setInterests(data.interests);
             } catch (error) {
                 console.error('Ошибка загрузки интересов:', error);
