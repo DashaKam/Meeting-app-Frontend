@@ -10,18 +10,51 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import {registerUser, saveUserInterests, fetchInterests} from "../services/api";
+import { registerUser, saveUserInterests, fetchInterests } from "../services/api";
 
-const InterestScreen = ({navigation}) => {
-    const [interests, setInterests] = useState([]);
+const InterestScreen = ({ navigation }) => {
+    const [interests, setInterests] = useState({});
     const [selectedInterests, setSelectedInterests] = useState([]);
     const [isMaxReached, setIsMaxReached] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
 
-    useEffect(async () => {
-        setInterests((await fetchInterests()).interests);
+    useEffect(() => {
+        const loadInterests = async () => {
+            try {
+                const data = await fetchInterests();
+                let items;
+                // Determine shape of returned data
+                if (data && Array.isArray(data.interests)) {
+                    // { interests: [...] }
+                    items = data.interests;
+                } else if (Array.isArray(data)) {
+                    // [...] directly
+                    items = data;
+                } else if (data && data.interests && typeof data.interests === 'object') {
+                    // { interests: { category: [...] } }
+                    items = data.interests;
+                } else if (data && typeof data === 'object') {
+                    // { category: [...] }
+                    items = data;
+                } else {
+                    console.warn('Unexpected interests response shape:', data);
+                    items = {};
+                }
+                // If items is an array, wrap into a default category
+                if (Array.isArray(items)) {
+                    items = { All: items };
+                }
+                setInterests(items);
+            } catch (error) {
+                console.error('Ошибка загрузки интересов:', error);
+                Alert.alert('Ошибка', 'Не удалось загрузить список интересов');
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadInterests();
     }, []);
 
 
@@ -111,7 +144,7 @@ const InterestScreen = ({navigation}) => {
                     <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
                     <>
-                        {Object.entries(interests).map(([category, interestsList]) => (
+                        {Object.entries(interests || {}).map(([category, interestsList]) => (
                             <View key={category} style={styles.categoryContainer}>
                                 <Text style={styles.categoryTitle}>{category}</Text>
                                 <View style={styles.buttonRow}>

@@ -6,5 +6,5 @@ export const API_ENDPOINTS = {
   REFRESH: '/auth/refresh',
   PROFILE: '/users/me',
   USERS: '/users/',
-  INTERESTS: '/user-interests/',
+  INTERESTS: '/user-interests',
 };

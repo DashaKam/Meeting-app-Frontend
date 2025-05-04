@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL, API_ENDPOINTS } from '../constants/api';
-import {Alert} from "react-native";
+import { Alert } from "react-native";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -61,7 +61,7 @@ export const refreshToken = async (refresh_token) => {
 export const saveUserInterests = async (interests) => {
   try {
     const response = await api.put(API_ENDPOINTS.PROFILE,
-        { interests });
+      { interests });
     return response.data;
   } catch (error) {
     console.error('API Service: Error saving user interests:', error.response ? error.response.data : error.message);
@@ -72,15 +72,16 @@ export const saveUserInterests = async (interests) => {
 export const fetchUserProfile = async () => {
   try {
     const response = await api.get(API_ENDPOINTS.PROFILE);
-    return response.data; // User data object
+    return response.data;
   } catch (error) {
     console.error('API Service: Error fetching user profile:', error.response ? error.response.data : error.message);
     throw error;
   }
 };
+
 export const fetchInterests = async () => {
   try {
-    const response = await axios.get(API_ENDPOINTS.INTERESTS);
+    const response = await api.get(API_ENDPOINTS.INTERESTS);
     return response.data;
   } catch (error) {
     console.error('API Service: Error fetching interests:', error.response ? error.response.data : error.message);
