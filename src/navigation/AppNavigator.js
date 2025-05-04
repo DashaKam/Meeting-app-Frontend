@@ -10,6 +10,11 @@ import RegistrationScreen from '../screens/Registration';
 import SuccessScreen from '../screens/Success';
 import SettingsScreen from '../screens/Settings';
 import ChangePasswordScreen from '../screens/ChangePassword';
+import ChangeNicknameScreen from '../screens/ChangeNickname';
+import NotificationsScreen from "../screens/Notification";
+import SupportScreen from "../screens/Support";
+import InterestingArticlesScreen from "../screens/InterestingArticles";
+import ArticleScreen from "../screens/Article";
 
 
 const AuthStackNav = createNativeStackNavigator();
@@ -31,8 +36,13 @@ const AppStack = () => (
     <AppStackNav.Screen name="PeopleSwipe" component={PeopleSwipeScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="ChangeNickname" component={ChangeNicknameScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="Support" component={SupportScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="InterestingArticles" component={InterestingArticlesScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="Article" component={ArticleScreen} options={{ headerShown: false }} />
 
-    {/* Add other authenticated screens here */}
+      {/* Add other authenticated screens here */}
   </AppStackNav.Navigator>
 );
 

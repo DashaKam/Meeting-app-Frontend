@@ -67,10 +67,14 @@ const Profile = ({ navigation }) => {
             style={styles.button}
             onPress={() => {
               if (buttonLabel === 'Настройки') {
-                navigation.navigate('Settings'); // Переход на экран "Настройки"
+                navigation.navigate('Settings');
               } else if (buttonLabel === 'Выйти из профиля') {
                 handleLogout();
-              } else {
+              } else if (buttonLabel === 'Поддержка') {
+                navigation.navigate('Support');
+              } else if (buttonLabel === 'Может быть интересно') {
+                navigation.navigate('InterestingArticles');
+              }else {
                 console.log(`${buttonLabel} pressed`);
               }
             }}

@@ -5,21 +5,12 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import PlaceholderImage from '../assets/background.jpg';
-import { useAuth } from '../context/Auth';
-import Icon from 'react-native-vector-icons/Octicons';
+import { Octicons } from '@expo/vector-icons'; // Импортируйте иконки
 
 const SettingsScreen = ({ navigation }) => {
-    const { userData, logout } = useAuth();
-
-    // Функция выхода из аккаунта
-    const handleLogout = async () => {
-        await logout();
-    };
-
-    // Маппинг иконок для кнопок
     const buttonIcons = {
         'Изменить пароль': 'pencil',
         'Изменить никнейм': 'pencil',
@@ -27,15 +18,20 @@ const SettingsScreen = ({ navigation }) => {
         'Удалить аккаунт': 'trash',
         'Темная тема': 'moon',
     };
-
-
+    const screenNames = {
+        'Изменить пароль': 'ChangePassword',
+        'Изменить никнейм': 'ChangeNickname',
+        'Уведомления': 'Notifications',
+        'Удалить аккаунт': 'DeleteAccount',
+        'Темная тема': 'DarkMode',
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             {/* Верхняя панель с текстом "Настройки" и кнопкой "Назад" */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Icon name="chevron-left" size={24} color="#000" />
+                    <Octicons name="chevron-left" size={24} color="#000" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Настройки</Text>
             </View>
@@ -48,21 +44,24 @@ const SettingsScreen = ({ navigation }) => {
                     'Уведомления',
                     'Удалить аккаунт',
                     'Темная тема',
-                ].map((buttonLabel) => (
-                    <TouchableOpacity
-                        key={buttonLabel}
-                        style={styles.button}
-                        onPress={() => navigation.navigate(buttonLabel.replace(' ', ''))} // Убираем пробелы из названия экрана
-                    >
-                        <Icon
-                            name={buttonIcons[buttonLabel]}
-                            size={20}
-                            color="#000"
-                            style={styles.icon}
-                        />
-                        <Text style={styles.buttonText}>{buttonLabel}</Text>
-                    </TouchableOpacity>
-                ))}
+                ].map((buttonLabel) => {
+                    const screenName = screenNames[buttonLabel]; // Получаем имя экрана из маппинга
+                    return (
+                        <TouchableOpacity
+                            key={buttonLabel}
+                            style={styles.button}
+                            onPress={() => navigation.navigate(screenName)}
+                        >
+                            <Octicons
+                                name={buttonIcons[buttonLabel]}
+                                size={20}
+                                color="#000"
+                                style={styles.icon}
+                            />
+                            <Text style={styles.buttonText}>{buttonLabel}</Text>
+                        </TouchableOpacity>
+                    );
+                })}
             </ScrollView>
         </SafeAreaView>
     );
@@ -86,7 +85,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 24,
-        fontFamily: 'Evolventa',
+        fontFamily: 'Arial', // Используйте стандартный шрифт
         color: '#000',
         marginLeft: 10,
     },
@@ -95,19 +94,19 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     button: {
-        flexDirection: 'row', // Размещение иконки и текста в строку
-        alignItems: 'center', // Выравнивание по центру
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingVertical: 10,
         paddingHorizontal: 10,
         borderRadius: 5,
         marginVertical: 1,
     },
     icon: {
-        marginRight: 10, // Отступ между иконкой и текстом
+        marginRight: 10,
     },
     buttonText: {
         color: '#000',
-        fontFamily: 'Evolventa',
+        fontFamily: 'Arial', // Используйте стандартный шрифт
         fontSize: 0.025 * (Dimensions.get('window').height),
     },
 });
