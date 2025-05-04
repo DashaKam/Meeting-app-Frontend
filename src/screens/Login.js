@@ -9,7 +9,7 @@ import {
   Platform,
   Keyboard,
   StyleSheet
-} from 'react-native-web';
+} from 'react-native';
 import { useAuth } from '../context/Auth';
 import '../../fonts.css';
 import showAlert from "../utils/alert";
