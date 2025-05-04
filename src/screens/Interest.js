@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import { registerUser, saveUserInterests, fetchInterests } from "../services/api";
+import {registerUser, saveUserInterests, fetchInterests, fetchUserProfile} from "../services/api";
 
 const InterestScreen = ({ navigation }) => {
     const [interests, setInterests] = useState([]);
@@ -21,39 +21,58 @@ const InterestScreen = ({ navigation }) => {
 
 
     useEffect(() => {
-        const loadInterests = async () => {
+        const loadData = async () => {
             try {
-                const data = await fetchInterests();
-                setInterests(data.interests);
+                // Загружаем структуру всех интересов
+                const interestsResponse = await fetchInterests(); // GET /user-interests/
+                setInterests(interestsResponse.interests);
+
+                // Загружаем профиль пользователя
+                const profileResponse = await fetchUserProfile(); // GET /users/me
+                const userInterests = profileResponse.interests || [];
+
+                // Преобразуем интересы пользователя в формат { category, interest }
+                const selected = [];
+                Object.entries(interestsResponse.interests).forEach(([category, items]) => {
+                    items.forEach(interest => {
+                        if (userInterests.includes(interest)) {
+                            selected.push({ category, interest });
+                        }
+                    });
+                });
+
+                setSelectedInterests(selected);
+                setIsMaxReached(selected.length >= 10);
             } catch (error) {
-                console.error('Ошибка загрузки интересов:', error);
-                Alert.alert('Ошибка', 'Не удалось загрузить список интересов');
+                console.error('Ошибка загрузки данных:', error);
+                Alert.alert('Ошибка', 'Не удалось загрузить данные');
             } finally {
                 setLoading(false);
             }
         };
-        loadInterests();
+
+        loadData();
     }, []);
 
-
     const handleInterestPress = (category, interest) => {
-        if (isMaxReached) return;
-
         const existingIndex = selectedInterests.findIndex(
             (item) => item.category === category && item.interest === interest
         );
 
+        let updatedSelected;
+
         if (existingIndex !== -1) {
-            // Удалить выбранный интерес
-            const updatedSelected = [...selectedInterests];
+            // Удаляем интерес
+            updatedSelected = [...selectedInterests];
             updatedSelected.splice(existingIndex, 1);
-            setSelectedInterests(updatedSelected);
-            setIsMaxReached(updatedSelected.length >= 10);
         } else {
-            // Добавить новый интерес
-            setSelectedInterests([...selectedInterests, { category, interest }]);
-            setIsMaxReached(selectedInterests.length + 1 >= 10);
+            // Добавляем интерес, если ещё не достигнут лимит
+            if (selectedInterests.length >= 10) return; // Не даём добавить больше 10
+            updatedSelected = [...selectedInterests, { category, interest }];
         }
+
+        setSelectedInterests(updatedSelected);
+        setIsMaxReached(updatedSelected.length >= 10); // Всегда проверяем новое состояние
     };
 
     const saveInterests = async () => {
@@ -81,8 +100,7 @@ const InterestScreen = ({ navigation }) => {
         const isSelected = selectedInterests.some(
             (item) => item.category === category && item.interest === interest
         );
-        const isDisabled = isMaxReached || loading;
-
+        const isDisabled = (!isSelected && isMaxReached) || loading;
         return (
             <TouchableOpacity
                 key={`${category}-${interest}`}
@@ -140,13 +158,13 @@ const InterestScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5e6d3',
+        backgroundColor: '#F9EBDE',
     },
     header: {
-        padding: 15,
-        backgroundColor: '#ffffff',
+        padding: 10,
+        backgroundColor: '#F9EBDE',
         borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
+        borderBottomColor: '#F9EBDE',
         elevation: 2,
     },
     backButton: {
@@ -158,6 +176,7 @@ const styles = StyleSheet.create({
     },
     backButtonText: {
         color: 'white',
+        fontFamily: 'Evolventa',
         fontWeight: 'bold',
     },
     scrollContent: {
@@ -170,7 +189,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#4a3c32',
+        color: '#815854',
     },
     buttonRow: {
         flexDirection: 'row',
@@ -199,10 +218,12 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     buttonText: {
+        fontFamily: 'Evolventa',
         fontSize: 14,
-        color: '#4a3c32',
+        color: '#815854',
     },
     selectedButtonText: {
+        fontFamily: 'Evolventa',
         color: '#ffffff',
     },
 });
