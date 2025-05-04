@@ -253,8 +253,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Evolventa',
     fontSize: 40,
     fontStyle: 'normal',
-    fontWeight: 400,
-    lineHeight: 'normal',
+    fontWeight: '400',
     width: 343,
     height: 159,
     flexShrink: 0,
@@ -287,8 +286,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Evolventa',
     fontSize: 16,
     fontStyle: 'normal',
-    fontWeight: 400,
-    lineHeight: 'normal',
+    fontWeight: '400',
   },
 
   button: {
@@ -310,8 +308,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Evolventa',
     fontSize: 20,
     fontStyle: 'normal',
-    fontWeight: 400,
-    lineHeight: 'normal',
+    fontWeight: '400',
   },
 
   linkContainer: {
@@ -326,8 +323,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Evolventa',
     fontSize: 16,
     fontStyle: 'normal',
-    fontWeight: 400,
-    lineHeight: 'normal',
+    fontWeight: '400',
   },
 
   link: {
@@ -336,8 +332,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Evolventa',
     fontSize: 16,
     fontStyle: 'normal',
-    fontWeight: 400,
-    lineHeight: 'normal',
+    fontWeight: '400',
     textDecorationLine: 'underline',
   },
 
@@ -349,8 +344,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',// Выравнивание текста по центру
   },
 });
-
-
-
 
 export default RegistrationScreen;

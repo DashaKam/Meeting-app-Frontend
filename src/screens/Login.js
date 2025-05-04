@@ -177,7 +177,6 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontStyle: 'normal',
     fontWeight: 400,
-    lineHeight: 'normal',
     width: 343,
     height: 159,
     flexShrink: 0,
@@ -203,7 +202,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'normal',
     fontWeight: 400,
-    lineHeight: 'normal',
   },
 
   button: {
@@ -227,7 +225,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'normal',
     fontWeight: 400,
-    lineHeight: 'normal',
   },
 
   linkContainer: {
@@ -243,7 +240,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'normal',
     fontWeight: 400,
-    lineHeight: 'normal',
   },
 
   link: {
@@ -253,7 +249,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'normal',
     fontWeight: 400,
-    lineHeight: 'normal',
     textDecorationLine: 'underline',
   },
 
