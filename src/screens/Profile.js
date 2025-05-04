@@ -74,6 +74,8 @@ const Profile = ({ navigation }) => {
                 navigation.navigate('Support');
               } else if (buttonLabel === 'Может быть интересно') {
                 navigation.navigate('InterestingArticles');
+              }else if (buttonLabel === 'Редактировать анкету') {
+                navigation.navigate('Interest');
               }else {
                 console.log(`${buttonLabel} pressed`);
               }

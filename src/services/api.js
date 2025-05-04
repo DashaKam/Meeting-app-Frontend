@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL, API_ENDPOINTS } from '../constants/api';
+import {Alert} from "react-native";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -47,12 +48,23 @@ export const registerUser = async (name, username, email, password) => {
   }
 };
 
+
 export const refreshToken = async (refresh_token) => {
   try {
     const response = await api.post(API_ENDPOINTS.REFRESH, { refresh_token });
     return response.data; // { access_token }
   } catch (error) {
     console.error('API Service: Token refresh failed:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+export const saveUserInterests = async (interests) => {
+  try {
+    const response = await api.put(API_ENDPOINTS.PROFILE,
+        { interests });
+    return response.data;
+  } catch (error) {
+    console.error('API Service: Error saving user interests:', error.response ? error.response.data : error.message);
     throw error;
   }
 };
@@ -63,6 +75,15 @@ export const fetchUserProfile = async () => {
     return response.data; // User data object
   } catch (error) {
     console.error('API Service: Error fetching user profile:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+};
+export const fetchInterests = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.INTERESTS);
+    return response.data;
+  } catch (error) {
+    console.error('API Service: Error fetching interests:', error.response ? error.response.data : error.message);
     throw error;
   }
 };

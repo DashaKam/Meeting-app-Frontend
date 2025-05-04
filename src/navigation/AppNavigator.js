@@ -15,6 +15,8 @@ import NotificationsScreen from "../screens/Notification";
 import SupportScreen from "../screens/Support";
 import InterestingArticlesScreen from "../screens/InterestingArticles";
 import ArticleScreen from "../screens/Article";
+import InterestScreen from "../screens/Interest";
+
 
 
 const AuthStackNav = createNativeStackNavigator();
@@ -41,6 +43,7 @@ const AppStack = () => (
       <AppStackNav.Screen name="Support" component={SupportScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="InterestingArticles" component={InterestingArticlesScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="Article" component={ArticleScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="Interest" component={InterestScreen} options={{ headerShown: false }} />
 
       {/* Add other authenticated screens here */}
   </AppStackNav.Navigator>
