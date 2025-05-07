@@ -296,12 +296,12 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     backgroundColor: '#000',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 9,
     marginTop: 20
   },
 
   buttonText: {
-    width: '50%',
     flexShrink: 0,
     color: '#FAEBFF',
     textAlign: 'center',
