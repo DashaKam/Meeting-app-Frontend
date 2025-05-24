@@ -75,7 +75,7 @@ const Profile = ({ navigation }) => {
               } else if (buttonLabel === 'Может быть интересно') {
                 navigation.navigate('InterestingArticles');
               }else if (buttonLabel === 'Редактировать анкету') {
-                navigation.navigate('Interest');
+                navigation.navigate('ProfileEditing');
               }else {
                 console.log(`${buttonLabel} pressed`);
               }

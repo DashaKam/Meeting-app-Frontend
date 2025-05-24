@@ -16,6 +16,7 @@ import SupportScreen from "../screens/Support";
 import InterestingArticlesScreen from "../screens/InterestingArticles";
 import ArticleScreen from "../screens/Article";
 import InterestScreen from "../screens/Interest";
+import ProfileEditingScreen from "../screens/ProfileEditing";
 
 
 
@@ -44,6 +45,7 @@ const AppStack = () => (
       <AppStackNav.Screen name="InterestingArticles" component={InterestingArticlesScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="Article" component={ArticleScreen} options={{ headerShown: false }} />
       <AppStackNav.Screen name="Interest" component={InterestScreen} options={{ headerShown: false }} />
+      <AppStackNav.Screen name="ProfileEditing" component={ProfileEditingScreen} options={{ headerShown: false }} />
 
       {/* Add other authenticated screens here */}
   </AppStackNav.Navigator>
